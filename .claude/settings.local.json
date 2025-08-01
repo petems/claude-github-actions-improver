@@ -4,7 +4,11 @@
     "allow": [
       "Bash(./github-actions-improver.py --mode create)",
       "Bash(chmod:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(PYTHONPATH=. python3 enhanced-concurrent-fixer.py --days 7)",
+      "Bash(./install-enhanced.sh:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

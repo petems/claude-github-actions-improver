@@ -240,7 +240,7 @@ install_commands() {
         fi
         
         # Copy scripts
-        local scripts=("claude-agent-github-actions-enhanced.py" "failure-analyzer.py" "github-actions-improver-minimal.py" "interactive-gha-analyzer.py")
+        local scripts=("claude-agent-github-actions-enhanced.py" "failure-analyzer.py" "github-actions-improver-minimal.py" "interactive-gha-analyzer.py" "github-token-generator.py" "api-limit-handler.py" "enhanced-concurrent-fixer.py" "claude-token-setup.py" "secure-config-manager.py" "claude-config-setup.py")
         for script in "${scripts[@]}"; do
             if [[ -f "$script" ]]; then
                 cp "$script" "$INSTALL_DIR/"
@@ -322,6 +322,12 @@ commands = {
         "prompt": f"Execute the comprehensive GitHub Actions analysis workflow from {install_dir}/commands/gha-analyze.md. Generate detailed intelligence reports covering performance metrics, failure patterns, security posture, and optimization opportunities.",
         "working_directory_required": True,
         "git_repository_required": True
+    },
+    "/gha:setup-token": {
+        "description": "Interactive GitHub token generator and configuration helper",
+        "prompt": f"I'll help you set up a GitHub token for enhanced API access and higher rate limits. Let me check your current status and guide you through the setup.\\n\\nFirst, let me analyze your current configuration:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --status\\n```\\n\\nThen I'll show you the available setup options:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --options\\n```\\n\\nBased on your preference, I can help you with:\\n1. GitHub CLI setup (easiest)\\n2. Personal Access Token creation\\n3. Secure token storage\\n\\nThis will increase your rate limit from 60 to 5,000+ requests/hour and enable 20+ concurrent workers instead of just 2. Which option would you like to pursue?",
+        "working_directory_required": False,
+        "git_repository_required": False
     }
 }
 
