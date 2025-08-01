@@ -28,7 +28,8 @@ class TestBasicFunctionality(unittest.TestCase):
             "requirements.txt",
             "failure-analyzer.py",
             "github-actions-improver-minimal.py",
-            "claude-agent-github-actions-enhanced.py"
+            "claude-agent-github-actions-enhanced.py",
+            "wgu-fighter.py"
         ]
         
         for file_name in project_files:
@@ -62,6 +63,12 @@ class TestToolFunctionality(unittest.TestCase):
         analyzer_path = project_root / "failure-analyzer.py"
         self.assertTrue(analyzer_path.exists())
         self.assertTrue(os.access(analyzer_path, os.X_OK))
+    
+    def test_wgu_fighter_exists(self):
+        """Test that WGU fighter script exists and is executable"""
+        wgu_path = project_root / "wgu-fighter.py"
+        self.assertTrue(wgu_path.exists())
+        self.assertTrue(os.access(wgu_path, os.X_OK))
     
     def test_requirements_parseable(self):
         """Test that requirements.txt is valid"""
