@@ -240,7 +240,7 @@ install_commands() {
         fi
         
         # Copy scripts
-        local scripts=("claude-agent-github-actions-enhanced.py" "failure-analyzer.py" "github-actions-improver-minimal.py" "interactive-gha-analyzer.py" "github-token-generator.py" "api-limit-handler.py" "enhanced-concurrent-fixer.py" "claude-token-setup.py" "secure-config-manager.py" "claude-config-setup.py")
+        local scripts=("claude-agent-github-actions-enhanced.py" "failure-analyzer.py" "github-actions-improver-minimal.py" "interactive-gha-analyzer.py" "github-token-generator.py" "api-limit-handler.py" "enhanced-concurrent-fixer.py" "claude-token-setup.py" "secure-config-manager.py" "claude-config-setup.py" "wgu-fighter.py")
         for script in "${scripts[@]}"; do
             if [[ -f "$script" ]]; then
                 cp "$script" "$INSTALL_DIR/"
@@ -328,6 +328,12 @@ commands = {
         "prompt": f"I'll help you set up a GitHub token for enhanced API access and higher rate limits. Let me check your current status and guide you through the setup.\\n\\nFirst, let me analyze your current configuration:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --status\\n```\\n\\nThen I'll show you the available setup options:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --options\\n```\\n\\nBased on your preference, I can help you with:\\n1. GitHub CLI setup (easiest)\\n2. Personal Access Token creation\\n3. Secure token storage\\n\\nThis will increase your rate limit from 60 to 5,000+ requests/hour and enable 20+ concurrent workers instead of just 2. Which option would you like to pursue?",
         "working_directory_required": False,
         "git_repository_required": False
+    },
+    "/gha:wgu": {
+        "description": "Won't Give Up - Persistent GitHub Actions fixer that keeps fighting until green",
+        "prompt": f"(ง'̀-'́)ง\\n\\nExecute the Won't Give Up (WGU) GitHub Actions fighter from {install_dir}/commands/gha-wgu.md. This is the most persistent and determined GitHub Actions fixer - it won't give up until everything is green!\\n\\nThe WGU fighter implements a relentless retry loop:\\n1. Analyze failing workflows with advanced pattern recognition\\n2. Apply intelligent fixes based on root cause analysis\\n3. Wait and monitor for workflow runs to complete (using 'gh run list --limit 5')\\n4. Verify results and celebrate victories with ୧༼ʘ̆ںʘ̆༽୨ when winning\\n5. Keep fighting until 100% success rate OR write detailed battle report\\n\\nThis code is a fighter - he won't give up! Perfect for stubborn workflows that keep failing despite multiple attempts. The fighter will keep trying different strategies, applying fixes, and monitoring results until everything turns green.\\n\\nUse this when regular /gha:fix isn't persistent enough and you need a determined approach that will keep fighting until victory is achieved.",
+        "working_directory_required": True,
+        "git_repository_required": True
     }
 }
 
@@ -459,7 +465,7 @@ uninstall() {
         
         # Clean up slash commands from Claude settings
         if [[ -f "$CLAUDE_SETTINGS_DIR/settings.json" ]]; then
-            python3 << 'EOF'
+            python3 << 'EOF' "$CLAUDE_SETTINGS_DIR/settings.json"
 import json
 import sys
 
@@ -519,6 +525,7 @@ main_install() {
     echo -e "  ${CYAN}/gha:fix${NC}        - Intelligent failure analysis and fixing"
     echo -e "  ${CYAN}/gha:create${NC}     - Smart workflow creation for your project"
     echo -e "  ${CYAN}/gha:analyze${NC}    - Comprehensive performance and security analysis"
+    echo -e "  ${CYAN}/gha:wgu${NC}        - Won't Give Up persistent fighter (ง'̀-'́)ง"
     echo
     log_info "Usage: Navigate to any Git repository and run 'claude', then use the slash commands"
     echo
