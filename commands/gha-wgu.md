@@ -21,6 +21,7 @@ Unlike other commands that analyze and fix once, `/gha:wgu` implements a **persi
 
 ### Phase 1: Initial Assessment
 ```
+(ง'̀-'́)ง
 🔥 WGU: Won't Give Up GitHub Actions Fixer
 💪 "This code is a fighter - analyzing the battlefield..."
 
@@ -63,6 +64,7 @@ Unlike other commands that analyze and fix once, `/gha:wgu` implements a **persi
    ✅ ci.yml: SUCCESS! All tests passing!
    
 🎉 VICTORY! All workflows now green!
+୧༼ʘ̆ںʘ̆༽୨ VICTORIOUS FIGHTER! ୧༼ʘ̆ںʘ̆༽୨
 💪 "Never gave up - that's the fighting spirit!"
 
 📈 Final Results:

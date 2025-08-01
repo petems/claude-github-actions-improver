@@ -69,6 +69,7 @@ class WGUFighter:
     def fight_until_victory(self) -> BattleStatus:
         """Main battle loop - won't give up until victory or strategic retreat"""
         
+        print("(ง'̀-'́)ง")
         print("🔥 WGU: Won't Give Up GitHub Actions Fixer")
         print("💪 \"This code is a fighter - analyzing the battlefield...\"")
         print()
@@ -77,6 +78,7 @@ class WGUFighter:
         initial_status = self.assess_battlefield()
         if not initial_status['failures']:
             print("🎉 Wait... everything is already green! No battle needed!")
+            print("୧༼ʘ̆ںʘ̆༽୨ Victory without battle!")
             return BattleStatus.VICTORY
             
         print(f"📊 Initial Status Check:")
@@ -420,6 +422,7 @@ class WGUFighter:
         
         print("🎉" * 50)
         print("🏆 TOTAL VICTORY! 🏆")
+        print("୧༼ʘ̆ںʘ̆༽୨ VICTORIOUS FIGHTER! ୧༼ʘ̆ںʘ̆༽୨")
         print("💪 \"Never gave up - that's the fighting spirit!\"")
         print()
         print("📈 Final Battle Statistics:")
