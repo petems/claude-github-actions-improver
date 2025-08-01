@@ -247,7 +247,7 @@ install_commands() {
         fi
         
         # Copy scripts
-        local scripts=("claude-agent-github-actions-enhanced.py" "failure-analyzer.py" "github-actions-improver-minimal.py" "interactive-gha-analyzer.py" "github-token-generator.py" "api-limit-handler.py" "enhanced-concurrent-fixer.py" "claude-token-setup.py" "secure-config-manager.py" "claude-config-setup.py")
+        local scripts=("claude-agent-github-actions-enhanced.py" "failure-analyzer.py" "github-actions-improver-minimal.py" "interactive-gha-analyzer.py" "github-token-generator.py" "api-limit-handler.py" "enhanced-concurrent-fixer.py" "claude-token-setup.py" "secure-config-manager.py" "claude-config-setup.py" "wgu-fighter.py")
         for script in "${scripts[@]}"; do
             if [[ -f "$script" ]]; then
                 cp "$script" "$INSTALL_DIR/"
@@ -435,6 +435,34 @@ uninstall() {
             fi
         fi
         
+        # Clean up slash commands from Claude settings
+        if [[ -f "$CLAUDE_SETTINGS_DIR/settings.json" ]]; then
+            python3 << 'EOF' "$CLAUDE_SETTINGS_DIR/settings.json"
+import json
+import sys
+
+settings_file = sys.argv[1]
+
+try:
+    with open(settings_file, 'r') as f:
+        settings = json.load(f)
+    
+    # Remove our commands
+    if 'slashCommands' in settings:
+        commands_to_remove = [k for k in settings['slashCommands'].keys() if k.startswith('/gha:')]
+        for cmd in commands_to_remove:
+            del settings['slashCommands'][cmd]
+    
+    with open(settings_file, 'w') as f:
+        json.dump(settings, f, indent=2)
+    
+    print(f"Removed {len(commands_to_remove)} slash commands")
+except:
+    print("Could not update Claude settings")
+EOF
+            log_success "Removed slash commands from Claude settings"
+        fi
+        
         log_success "Uninstallation complete"
     else
         log_info "[DRY RUN] Would remove installation and clean up settings"
@@ -466,11 +494,12 @@ main_install() {
     echo
     log_info "Installation directory: $INSTALL_DIR"
     log_info "Commands directory: $CLAUDE_COMMANDS_DIR"
-    log_info "Available slash commands:"
-    echo -e "  ${CYAN}/gha-fix${NC}        - Intelligent failure analysis and fixing"
-    echo -e "  ${CYAN}/gha-create${NC}     - Smart workflow creation for your project"
-    echo -e "  ${CYAN}/gha-analyze${NC}    - Comprehensive performance and security analysis"
-    echo -e "  ${CYAN}/gha-setup-token${NC} - GitHub token setup for enhanced API access"
+    log_info "Available commands:"
+    echo -e "  ${CYAN}/gha:fix${NC}        - Intelligent failure analysis and fixing"
+    echo -e "  ${CYAN}/gha:create${NC}     - Smart workflow creation for your project"
+    echo -e "  ${CYAN}/gha:analyze${NC}    - Comprehensive performance and security analysis"
+    echo -e "  ${CYAN}/gha:setup-token${NC} - GitHub token setup for enhanced API access"
+    echo -e "  ${CYAN}/gha:wgu${NC}        - Won't Give Up persistent fighter (ง'̀-'́)ง"
     echo
     log_info "Usage: Navigate to any Git repository and run 'claude', then use the slash commands"
     log_info "Note: Command files installed as Markdown files in ~/.claude/commands/"
