@@ -1,0 +1,7 @@
+# No external dependencies required
+# This project only uses Python standard library modules:
+# - os, sys, json, subprocess, argparse, pathlib, typing
+
+# Optional dependencies for enhanced functionality:
+# requests>=2.28.0  # If we add HTTP requests in the future
+# pyyaml>=6.0       # If we add YAML parsing capabilities

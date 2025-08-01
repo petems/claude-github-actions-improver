@@ -1,0 +1,38 @@
+{
+  "name": "github-actions-improver",
+  "description": "Improves GitHub Actions workflows in any repository",
+  "version": "1.0.0",
+  "entry_point": "claude-agent-github-actions.py",
+  "capabilities": [
+    "create_workflows",
+    "improve_workflows", 
+    "fix_failing_workflows",
+    "concurrent_processing"
+  ],
+  "triggers": [
+    "improve github actions",
+    "create github actions workflows",
+    "fix github actions",
+    "setup ci/cd pipeline",
+    "analyze github workflows"
+  ],
+  "requirements": {
+    "claude_cli": ">=1.0.0",
+    "python": ">=3.7",
+    "git_repository": true
+  },
+  "usage_examples": [
+    {
+      "trigger": "Improve GitHub Actions in this repository",
+      "description": "Analyzes project, creates/improves/fixes workflows concurrently"
+    },
+    {
+      "trigger": "Create GitHub Actions workflows for this Python project", 
+      "description": "Creates CI, security workflows tailored to project type"
+    },
+    {
+      "trigger": "Fix failing GitHub Actions workflows",
+      "description": "Analyzes and fixes common workflow issues in parallel"
+    }
+  ]
+}

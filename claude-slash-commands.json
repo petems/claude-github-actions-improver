@@ -1,0 +1,40 @@
+{
+  "commands": {
+    "/actions": {
+      "description": "Improve GitHub Actions in this repository (full analysis)",
+      "prompt": "Analyze this repository and improve the GitHub Actions workflows. Detect the project type, create workflows if none exist, improve existing workflows with best practices, and fix any common issues. Process multiple workflows concurrently for efficiency.",
+      "working_directory_required": true,
+      "git_repository_required": true
+    },
+    "/actions-create": {
+      "description": "Create GitHub Actions workflows for this project",
+      "prompt": "Analyze this project and create appropriate GitHub Actions workflows. Detect the project type (Python, Node.js, Rust, Go, Java, etc.) and create CI/CD pipelines, security scanning, and release workflows tailored to the project. Use modern best practices and latest action versions.",
+      "working_directory_required": true,
+      "git_repository_required": true
+    },
+    "/actions-fix": {
+      "description": "Fix failing GitHub Actions workflows",
+      "prompt": "Analyze all GitHub Actions workflows in this repository and fix common issues like outdated action versions, syntax errors, missing dependencies, permission problems, and caching issues. Process multiple workflows concurrently.",
+      "working_directory_required": true,
+      "git_repository_required": true
+    },
+    "/actions-improve": {
+      "description": "Improve existing GitHub Actions with best practices",
+      "prompt": "Improve all existing GitHub Actions workflows in this repository by updating to latest action versions with SHA pinning, adding security hardening, optimizing caching strategies, improving matrix configurations, and adding proper permissions. Process workflows concurrently.",
+      "working_directory_required": true,
+      "git_repository_required": true
+    },
+    "/actions-security": {
+      "description": "Add security scanning to GitHub Actions",
+      "prompt": "Analyze this project and add comprehensive security scanning to GitHub Actions workflows. Include dependency vulnerability scanning, SAST analysis, license compliance checking, and security best practices. Create or enhance security workflows.",
+      "working_directory_required": true,
+      "git_repository_required": true
+    },
+    "/ci": {
+      "description": "Quick CI workflow creation",
+      "prompt": "Create a modern CI/CD workflow for this project. Detect the project type and create an optimized continuous integration pipeline with testing, linting, caching, and matrix builds where appropriate.",
+      "working_directory_required": true,
+      "git_repository_required": true
+    }
+  }
+}
