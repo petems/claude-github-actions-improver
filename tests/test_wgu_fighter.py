@@ -105,7 +105,6 @@ class TestWGUFighter(unittest.TestCase):
         self.assertEqual(workflows[1].name, "Security")
         self.assertEqual(workflows[1].status, "failure")
     
-    @unittest.skip("Mock interaction needs refinement - core functionality works")
     @patch('subprocess.run') 
     def test_get_recent_workflow_status_error(self, mock_subprocess):
         """Test workflow status retrieval with errors"""
@@ -304,7 +303,6 @@ class TestWGUFighterIntegration(unittest.TestCase):
         mock_print.assert_any_call("🎉 Wait... everything is already green! No battle needed!")
         mock_print.assert_any_call("୧༼ʘ̆ںʘ̆༽୨ Victory without battle!")
     
-    @unittest.skip("Mock interaction needs refinement - core functionality works")
     @patch('subprocess.run')
     @patch('builtins.print')
     @patch('time.sleep')  # Mock sleep to speed up tests
@@ -330,9 +328,21 @@ class TestWGUFighterIntegration(unittest.TestCase):
             json.dumps([])
         ]
         
-        mock_result = Mock()
-        mock_subprocess.return_value = mock_result
-        mock_result.stdout.side_effect = responses
+        # Create a proper side_effect function that returns mock results with the right stdout
+        def mock_subprocess_side_effect(*args, **kwargs):
+            if not hasattr(mock_subprocess_side_effect, 'call_count'):
+                mock_subprocess_side_effect.call_count = 0
+            
+            # Get the appropriate response for this call
+            response_idx = min(mock_subprocess_side_effect.call_count, len(responses) - 1)
+            
+            mock_result = Mock()
+            mock_result.stdout = responses[response_idx]
+            
+            mock_subprocess_side_effect.call_count += 1
+            return mock_result
+        
+        mock_subprocess.side_effect = mock_subprocess_side_effect
         
         # Mock file system for fixes
         Path("requirements.txt").touch()
@@ -364,7 +374,6 @@ class TestWGUFighterIntegration(unittest.TestCase):
         report_path = Path("WGU-BATTLE-REPORT.md")
         self.assertTrue(report_path.exists())
     
-    @unittest.skip("Mock interaction needs refinement - core functionality works")
     @patch('subprocess.run')
     def test_wait_for_battle_results(self, mock_subprocess):
         """Test waiting for workflow completion"""
@@ -380,9 +389,21 @@ class TestWGUFighterIntegration(unittest.TestCase):
             ])
         ]
         
-        mock_result = Mock()
-        mock_subprocess.return_value = mock_result
-        mock_result.stdout.side_effect = responses
+        # Create a proper side_effect function that returns mock results with the right stdout
+        def mock_subprocess_side_effect(*args, **kwargs):
+            if not hasattr(mock_subprocess_side_effect, 'call_count'):
+                mock_subprocess_side_effect.call_count = 0
+            
+            # Get the appropriate response for this call  
+            response_idx = min(mock_subprocess_side_effect.call_count, len(responses) - 1)
+            
+            mock_result = Mock()
+            mock_result.stdout = responses[response_idx]
+            
+            mock_subprocess_side_effect.call_count += 1
+            return mock_result
+        
+        mock_subprocess.side_effect = mock_subprocess_side_effect
         
         with patch('time.sleep'):  # Mock sleep to speed up test
             self.fighter.wait_for_battle_results()
