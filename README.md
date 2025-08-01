@@ -1,5 +1,15 @@
 # Claude GitHub Actions Improver
 
+## 🎬 Live Demo: Intelligent Failure Analysis in Action
+
+### Interactive Demo (Click to Play)
+[![asciicast](https://asciinema.org/a/4BeejbTjViMzbBtz9LWkZgZNf.svg)](https://asciinema.org/a/4BeejbTjViMzbBtz9LWkZgZNf)
+
+### Preview GIF
+![GitHub Actions Improver Demo](demo.gif)
+
+*Watch the complete workflow: problem discovery → intelligent analysis → automated fixing → verification*
+
 A comprehensive Claude Agent system that automatically improves GitHub Actions workflows with intelligent analysis and automated fixing. Features multi-threaded processing, pattern recognition, and enterprise-grade token management.
 
 ## 🎯 Key Capabilities
@@ -10,16 +20,6 @@ A comprehensive Claude Agent system that automatically improves GitHub Actions w
 4. **Template System** - Ultra-fast workflow creation (90% token savings)
 5. **Interactive Feedback** - Real-time progress indicators and streaming responses
 6. **Enterprise Token Management** - Secure GitHub token storage with 60 → 5,000+ API rate limits
-
-## 🎬 Live Demo: Intelligent Failure Analysis in Action
-
-### Interactive Demo (Click to Play)
-[![asciicast](https://asciinema.org/a/4BeejbTjViMzbBtz9LWkZgZNf.svg)](https://asciinema.org/a/4BeejbTjViMzbBtz9LWkZgZNf)
-
-### Preview GIF
-![GitHub Actions Improver Demo](demo.gif)
-
-*Watch the complete workflow: problem discovery → intelligent analysis → automated fixing → verification*
 
 **Features Showcased:**
 - 🔍 **15+ Error Patterns** recognized with 94% confidence scoring
