@@ -8,7 +8,10 @@
       "Bash(python3:*)",
       "Bash(PYTHONPATH=. python3 enhanced-concurrent-fixer.py --days 7)",
       "Bash(./install-enhanced.sh:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh run view:*)"
     ],
     "deny": []
   }
