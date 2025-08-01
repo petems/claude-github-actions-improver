@@ -2,9 +2,31 @@
 
 This repository contains a Claude Agent that automatically improves GitHub Actions workflows in any repository.
 
-## Available Commands
+## 🎯 Claude Slash Commands (Primary Interface)
 
-When working in any Git repository, you can use these Claude commands:
+The fastest way to use this agent is through Claude CLI slash commands. After installation, use these commands in any Git repository:
+
+### Primary Commands
+- `/actions` - **Full analysis and improvement** (create, improve, fix workflows)
+- `/ci` - **Quick CI workflow creation** (fast setup for any project type)
+- `/actions-minimal` - **Ultra-fast template-based workflows** (no Claude API calls)
+
+### Specialized Commands  
+- `/actions-create` - **Create new workflows** (CI, security, release)
+- `/actions-improve` - **Improve existing workflows** (best practices, security)
+- `/actions-fix` - **Fix failing workflows** (concurrent issue resolution)
+- `/actions-security` - **Add security scanning** (vulnerability detection)
+
+### Installation
+```bash
+git clone https://github.com/petems/claude-github-actions-improver.git
+cd claude-github-actions-improver
+./install-slash-commands.sh
+```
+
+## 💬 Natural Language Commands (Alternative)
+
+You can also use natural language commands:
 
 ### Primary Commands
 - `Improve GitHub Actions in this repository` - Full analysis and improvement
@@ -43,21 +65,37 @@ When working in any Git repository, you can use these Claude commands:
 
 ## Usage Examples
 
-### In Claude CLI:
+### 🎯 Slash Commands (Recommended):
 ```bash
 # Navigate to any repository
 cd /path/to/your/repo
 
-# Use Claude to improve workflows
-claude --prompt "Improve GitHub Actions in this repository"
+# Use slash commands in Claude CLI
+claude
+> /actions          # Full improvement
+> /ci               # Quick CI setup
+> /actions-minimal  # Template-based (ultra-fast)
+```
 
-# Or be specific about what you want
+### 💬 Natural Language:
+```bash
+# Use natural language prompts
+claude --prompt "Improve GitHub Actions in this repository"
 claude --prompt "Create GitHub Actions workflows for this Python project"
 claude --prompt "Fix the failing CI workflow and add security scanning"
 ```
 
+### ⚡ Direct Scripts:
+```bash
+# Template-based (no Claude API calls)
+./github-actions-improver-minimal.py --mode create
+
+# Claude-powered (intelligent analysis)
+./github-actions-improver-v2.py --mode auto
+```
+
 ### From IDE (with Claude integration):
-Just type any of the commands above in your Claude conversation.
+Just type any slash command or natural language prompt in your Claude conversation.
 
 ## Technical Details
 

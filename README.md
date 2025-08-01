@@ -23,42 +23,93 @@ A Claude Agent that automatically improves GitHub Actions workflows in any repos
 
 ## Installation
 
+### Quick Start with Slash Commands
+
 ```bash
-# Clone or download the script
-curl -O https://raw.githubusercontent.com/your-repo/claude-github-actions-fixer/main/github-actions-improver.py
-chmod +x github-actions-improver.py
+# Clone the repository
+git clone https://github.com/petems/claude-github-actions-improver.git
+cd claude-github-actions-improver
+
+# Install Claude CLI slash commands
+./install-slash-commands.sh
+
+# Use from any repository
+cd /path/to/your/project
+claude
+> /actions
+```
+
+### Manual Installation
+
+```bash
+# Clone or download the scripts
+git clone https://github.com/petems/claude-github-actions-improver.git
+cd claude-github-actions-improver
+chmod +x *.py
 ```
 
 ## Usage
 
-### Basic Usage
+### 🎯 Claude Slash Commands (Recommended)
 
-Run in any Git repository to automatically improve GitHub Actions:
+The easiest way to use the GitHub Actions Improver is through Claude CLI slash commands:
 
 ```bash
-./github-actions-improver.py
+# Navigate to any Git repository
+cd /path/to/your/project
+
+# Start Claude CLI
+claude
+
+# Use slash commands:
+> /actions          # Full analysis and improvement
+> /ci               # Quick CI workflow creation
+> /actions-minimal  # Ultra-fast template-based workflows
+> /actions-create   # Create new workflows
+> /actions-improve  # Improve existing workflows
+> /actions-fix      # Fix failing workflows
+> /actions-security # Add security scanning
+```
+
+**Install slash commands:**
+```bash
+./install-slash-commands.sh
+```
+
+### ⚡ Direct Script Usage
+
+#### Template-Based (Ultra Fast)
+```bash
+# Uses pre-built templates - no Claude API calls needed
+./github-actions-improver-minimal.py --mode create
+```
+
+#### Claude-Powered (Intelligent)
+```bash
+# Full Claude analysis and improvement
+./github-actions-improver-v2.py --mode auto
 ```
 
 ### Mode Options
 
 ```bash
 # Only create workflows (if none exist)
-./github-actions-improver.py --mode create
+./github-actions-improver-v2.py --mode create
 
 # Only improve existing workflows  
-./github-actions-improver.py --mode improve
+./github-actions-improver-v2.py --mode improve
 
 # Only fix failing workflows
-./github-actions-improver.py --mode fix
+./github-actions-improver-v2.py --mode fix
 
 # Do everything (default)
-./github-actions-improver.py --mode auto
+./github-actions-improver-v2.py --mode auto
 ```
 
 ### Specify Repository Path
 
 ```bash
-./github-actions-improver.py --repo-path /path/to/your/repo
+./github-actions-improver-v2.py --repo-path /path/to/your/repo
 ```
 
 ## What It Does
@@ -109,6 +160,18 @@ Spawns specialized Claude agents to fix common issues:
 - Permission issues
 - Caching configuration problems
 - Matrix build issues
+
+## 🎯 Slash Commands Quick Reference
+
+| Command | Description | Use Case |
+|---------|-------------|-----------|
+| `/actions` | **Full improvement** | Complete analysis, creation, improvement, and fixing |
+| `/ci` | **Quick CI setup** | Fast CI/CD pipeline creation for any project |
+| `/actions-minimal` | **Template-based** | Ultra-fast workflows using pre-built templates |
+| `/actions-create` | **Create workflows** | New project setup with CI, security, release |
+| `/actions-improve` | **Improve existing** | Modernize with best practices and security |
+| `/actions-fix` | **Fix failures** | Debug and repair failing workflows |
+| `/actions-security` | **Add security** | Comprehensive security scanning workflows |
 
 ## Example Output
 
