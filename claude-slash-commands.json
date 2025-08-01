@@ -35,6 +35,12 @@
       "prompt": "Create a modern CI/CD workflow for this project. Detect the project type and create an optimized continuous integration pipeline with testing, linting, caching, and matrix builds where appropriate.",
       "working_directory_required": true,
       "git_repository_required": true
+    },
+    "/actions-minimal": {
+      "description": "Ultra-fast workflow creation using templates (no Claude needed)",
+      "prompt": "Use the minimal GitHub Actions improver to create workflows instantly using pre-built templates. This approach is extremely fast and token-efficient, using templates for Python, Node.js, Rust, Go, Java, PHP, Ruby, and .NET projects. Only uses Claude for complex customizations.",
+      "working_directory_required": true,
+      "git_repository_required": true
     }
   }
 }

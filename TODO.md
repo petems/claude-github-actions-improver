@@ -4,6 +4,12 @@ Roadmap for future enhancements and features.
 
 ## 🚀 **High Priority**
 
+### **Template System** ✅
+- [x] **Baseline Templates** - Created minimalist templates for Python, Node.js, Rust, Go, Java, PHP, Ruby, .NET
+- [x] **Template Manager** - Python class for managing and customizing templates
+- [x] **Minimal Improver** - Ultra-fast workflow creation using templates (no Claude needed)
+- [ ] **Template Testing** - Automated testing of all templates across different project structures
+
 ### **Language & Framework Support**
 - [ ] **TypeScript Support** - Dedicated TypeScript workflows with tsc, type checking, and proper Node.js matrix
 - [ ] **Terraform Support** - Infrastructure workflows with terraform plan/apply, security scanning (tfsec, checkov)

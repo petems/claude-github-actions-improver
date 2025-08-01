@@ -3,7 +3,8 @@
   "permissions": {
     "allow": [
       "Bash(./github-actions-improver.py --mode create)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
