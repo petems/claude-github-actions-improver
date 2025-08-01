@@ -26,6 +26,7 @@ chmod +x install-slash-commands.sh
 | `/gha:create` | **Smart workflow creation** | Template-based, 90% token savings | Project-tailored CI/CD with security scanning |
 | `/gha:analyze` | **Comprehensive intelligence** | 4-phase analysis workflow | Performance metrics, failure patterns, security audit |
 | `/gha:setup-token` | **Token management** | Rate limit: 60 → 5,000+ requests/hour | GitHub token setup with secure storage |
+| `/gha:wgu` | **Won't Give Up fighter** | Persistent retry loop until victory | For stubborn workflows that keep failing |
 
 ### 🔄 **Legacy Commands (Still Supported)**
 
@@ -61,6 +62,9 @@ Then use enhanced slash commands:
 
 > /gha:setup-token
 # Configure GitHub token for enhanced performance
+
+> /gha:wgu
+# Won't Give Up - persistent fighter until everything is green!
 ```
 
 ### Legacy Commands (Still Work)
@@ -125,6 +129,24 @@ Then use enhanced slash commands:
 - 🚀 **Performance**: Enables 20+ concurrent workers instead of 2
 - 🛡️ **Claude Best Practices**: Follows Claude security guidelines
 - 🎯 **Setup Options**: GitHub CLI, Personal Access Token, or existing token import
+
+#### `/gha:wgu` - Won't Give Up Fighter
+- 🔥 **Fighting Spirit**: "This code is a fighter - he won't give up!"
+- 🥊 **Persistent Retry Loop**: Keeps fighting until 100% success rate
+- ⏳ **Real Monitoring**: Uses `gh run list` to wait for actual results
+- 🎯 **Victory Focused**: Won't stop until everything is green
+- 📝 **Battle Reports**: Documents attempts if victory isn't achieved
+- 💪 **Motivational**: Includes fighting spirit messages throughout
+
+**Perfect for**: Stubborn workflows that keep failing despite multiple attempts. When `/gha:fix` isn't persistent enough and you need a determined approach.
+
+**Sample Usage**:
+```bash
+> /gha:wgu                    # Basic fighting mode
+> /gha:wgu --aggressive       # Try experimental fixes
+> /gha:wgu --marathon         # 20 rounds instead of 10
+> /gha:wgu --impatient        # Shorter wait times
+```
 
 ### 🔄 Legacy Commands
 
