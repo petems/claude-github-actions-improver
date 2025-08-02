@@ -54,6 +54,8 @@ class TestSecureConfigManager(unittest.TestCase):
         # Create manager instance (may be mocked if cryptography unavailable)
         try:
             self.config_manager = SecureConfigManager()
+            # Ensure directories are actually created
+            self.config_manager.app_config_dir.mkdir(parents=True, exist_ok=True)
         except Exception:
             # Skip tests if cryptography dependencies aren't available
             self.skipTest("Cryptography dependencies not available")
@@ -117,6 +119,8 @@ class TestSecureConfigManagerEncryption(unittest.TestCase):
         
         try:
             self.config_manager = SecureConfigManager()
+            # Ensure directories are actually created
+            self.config_manager.app_config_dir.mkdir(parents=True, exist_ok=True)
             self.has_crypto = True
         except Exception:
             self.has_crypto = False
@@ -187,6 +191,8 @@ class TestSecureConfigManagerTokenStorage(unittest.TestCase):
         
         try:
             self.config_manager = SecureConfigManager()
+            # Ensure directories are actually created
+            self.config_manager.app_config_dir.mkdir(parents=True, exist_ok=True)
             self.has_crypto = True
         except Exception:
             self.has_crypto = False
