@@ -51,10 +51,14 @@ class SecureConfigManager:
         # Method 1: System Keychain (Most Secure)
         if self._try_keychain_storage(token, token_type, description):
             return True
+        else:
+            print("⚠️ Keychain storage not available, using encrypted file storage")
             
         # Method 2: Claude Config Directory with Encryption
         if self._try_encrypted_storage(token, token_type):
             return True
+        else:
+            print("⚠️ Encrypted file storage failed, using environment variable")
             
         # Method 3: Environment Variable (Fallback)
         return self._try_environment_storage(token, token_type)
@@ -78,21 +82,30 @@ class SecureConfigManager:
         account_name = "github-actions-improver"
         
         try:
-            # Delete existing entry if it exists
+            # First check if we can access the keychain
+            test_result = subprocess.run([
+                "security", "list-keychains", "-d", "user"
+            ], capture_output=True, text=True)
+            
+            if test_result.returncode != 0:
+                print(f"⚠️ Cannot access user keychain: {test_result.stderr}")
+                return False
+            
+            # Delete existing entry if it exists (ignore errors)
             subprocess.run([
                 "security", "delete-generic-password",
                 "-s", service_name,
                 "-a", account_name
             ], capture_output=True)
             
-            # Add new entry
+            # Try adding to login keychain specifically
             result = subprocess.run([
                 "security", "add-generic-password",
                 "-s", service_name,
                 "-a", account_name,
                 "-w", token,
                 "-D", description,
-                "-T", "",  # Allow all applications
+                "-T", "/usr/bin/security",  # Allow security tool access
                 "-U"  # Update if exists
             ], capture_output=True, text=True)
             
@@ -101,7 +114,13 @@ class SecureConfigManager:
                 self._save_config({"storage_method": "keychain", "service": service_name})
                 return True
             else:
-                print(f"❌ Keychain storage failed: {result.stderr}")
+                # Check for specific keychain errors
+                error_msg = result.stderr.lower()
+                if "keychain cannot be found" in error_msg or "no such keychain" in error_msg:
+                    print(f"⚠️ Keychain access issue - trying alternative storage...")
+                    print(f"💡 You may need to unlock your keychain or create a new one")
+                else:
+                    print(f"❌ Keychain storage failed: {result.stderr}")
                 return False
                 
         except Exception as e:
@@ -157,22 +176,36 @@ class SecureConfigManager:
         """Store token in encrypted file in Claude config directory"""
         try:
             print("🔐 Setting up encrypted storage in Claude config directory...")
+            print("💡 This is secure and doesn't require keychain access")
             
             # Get password for encryption
-            password = getpass.getpass("Enter a password to encrypt your token: ")
-            if len(password) < 8:
+            while True:
+                password = getpass.getpass("Enter a password to encrypt your token (min 8 chars): ")
+                if len(password) >= 8:
+                    break
                 print("❌ Password too short (minimum 8 characters)")
+                
+                retry = input("Try again? (y/n): ").lower()
+                if retry != 'y':
+                    return False
+            
+            # Confirm password
+            confirm_password = getpass.getpass("Confirm password: ")
+            if password != confirm_password:
+                print("❌ Passwords don't match")
                 return False
             
             # Encrypt the token
             key = self._get_encryption_key(password)
             fernet = Fernet(key)
             
+            import time
             encrypted_data = {
                 "token": fernet.encrypt(token.encode()).decode(),
                 "token_type": token_type,
-                "created_at": str(os.path.getmtime),
-                "encrypted": True
+                "created_at": int(time.time()),
+                "encrypted": True,
+                "description": "GitHub Actions Improver Token"
             }
             
             # Save encrypted data
@@ -183,9 +216,13 @@ class SecureConfigManager:
             os.chmod(self.secure_file, 0o600)
             
             print(f"✅ Token encrypted and stored in: {self.secure_file}")
+            print(f"🔒 Only you can decrypt it with your password")
             self._save_config({"storage_method": "encrypted_file", "file": str(self.secure_file)})
             return True
             
+        except KeyboardInterrupt:
+            print("\n❌ Cancelled by user")
+            return False
         except Exception as e:
             print(f"❌ Encrypted storage error: {e}")
             return False
