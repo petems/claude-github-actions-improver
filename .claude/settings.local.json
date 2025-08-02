@@ -17,7 +17,9 @@
       "Bash(python -m pytest tests/ --cov=. --cov-report=term-missing --tb=short)",
       "Bash(python -m pytest tests/test_failure_analyzer.py -v)",
       "Bash(git commit:*)",
-      "Bash(python -m pytest tests/test_claude_token_setup.py -v)"
+      "Bash(python -m pytest tests/test_claude_token_setup.py -v)",
+      "Bash(timeout:*)",
+      "Bash(python -m pytest tests/test_gha_jobs_commands.py -v --tb=short)"
     ],
     "deny": []
   }
