@@ -12,7 +12,12 @@
       "Bash(gh run list:*)",
       "Bash(gh workflow:*)",
       "Bash(gh run view:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(python -m pytest tests/test_enhanced_concurrent_fixer.py -v)",
+      "Bash(python -m pytest tests/ --cov=. --cov-report=term-missing --tb=short)",
+      "Bash(python -m pytest tests/test_failure_analyzer.py -v)",
+      "Bash(git commit:*)",
+      "Bash(python -m pytest tests/test_claude_token_setup.py -v)"
     ],
     "deny": []
   }
