@@ -38,6 +38,8 @@ except ImportError:
                 self.app_config_dir = self.claude_config_dir / "github-actions-improver"
                 self.config_file = self.app_config_dir / "config.json"
                 self.secure_file = self.app_config_dir / "secure.enc"
+                # Ensure directories exist
+                self.app_config_dir.mkdir(parents=True, exist_ok=True)
 
 
 class TestSecureConfigManager(unittest.TestCase):
