@@ -160,7 +160,7 @@ check_prerequisites() {
     else
         log_debug "Found Claude CLI: $(command -v claude)"
         local claude_version
-        claude_version=$(claude --version 2>/dev/null || echo "unknown")
+        claude_version=$(timeout 5 claude --version 2>/dev/null || echo "unknown")
         log_debug "Claude CLI version: $claude_version"
     fi
     
@@ -168,7 +168,7 @@ check_prerequisites() {
     if command -v gh &> /dev/null; then
         log_debug "Found GitHub CLI: $(command -v gh)"
         local gh_version
-        gh_version=$(gh --version 2>/dev/null | head -n1 || echo "unknown")
+        gh_version=$(timeout 5 gh --version 2>/dev/null | head -n1 || echo "unknown")
         log_debug "GitHub CLI version: $gh_version"
     else
         log_warning "GitHub CLI not found. Some features (failure analysis) require 'gh'"
@@ -232,15 +232,22 @@ create_backup() {
 install_commands() {
     log_step "Installing command files..."
     
-    local commands_dir="$INSTALL_DIR/commands"
+    local claude_commands_dir="$HOME/.claude/commands/gha"
+    local local_commands_dir="$INSTALL_DIR/commands"
     
     if [[ "$DRY_RUN" == false ]]; then
-        mkdir -p "$commands_dir"
+        # Create Claude commands directory with gha subdirectory
+        mkdir -p "$claude_commands_dir"
+        mkdir -p "$local_commands_dir"
         
-        # Copy command files
+        # Copy command files to Claude's commands/gha directory
         if [[ -d "commands" ]]; then
-            cp -r commands/* "$commands_dir/"
-            log_success "Command files installed to: $commands_dir"
+            cp commands/*.md "$claude_commands_dir/"
+            log_success "Command files installed to Claude commands directory: $claude_commands_dir"
+            
+            # Also keep a copy in our install directory for reference
+            cp -r commands/* "$local_commands_dir/"
+            log_success "Command files backed up to: $local_commands_dir"
         else
             log_error "Commands directory not found in source"
             return 1
@@ -273,40 +280,15 @@ install_commands() {
         done
         
     else
-        log_info "[DRY RUN] Would install commands to: $commands_dir"
+        log_info "[DRY RUN] Would install commands to: $claude_commands_dir"
+        log_info "[DRY RUN] Would backup commands to: $local_commands_dir"
     fi
 }
 
-# Install Claude slash commands
-install_claude_commands() {
-    log_step "Installing Claude slash commands..."
-    
-    if [[ "$DRY_RUN" == false ]]; then
-        # Copy command files to Claude commands directory
-        if [[ -d "commands" ]]; then
-            # Copy all .md files from commands directory
-            cp commands/*.md "$CLAUDE_COMMANDS_DIR/"
-            log_success "Installed slash command files to: $CLAUDE_COMMANDS_DIR"
-            
-            # List installed commands
-            local installed_commands=($(ls "$CLAUDE_COMMANDS_DIR"/*.md 2>/dev/null | xargs -n1 basename -s .md))
-            if [[ ${#installed_commands[@]} -gt 0 ]]; then
-                log_info "Available slash commands:"
-                for cmd in "${installed_commands[@]}"; do
-                    log_debug "  /$cmd"
-                done
-            fi
-        else
-            log_error "Commands directory not found in source"
-            return 1
-        fi
-    else
-        log_info "[DRY RUN] Would install command files to: $CLAUDE_COMMANDS_DIR"
-        if [[ -d "commands" ]]; then
-            local command_files=($(ls commands/*.md 2>/dev/null))
-            log_info "[DRY RUN] Would install: ${command_files[*]}"
-        fi
-    fi
+# Update Claude settings (no longer needed with commands directory)
+update_claude_settings() {
+    log_step "Commands installed to ~/.claude/commands directory..."
+    log_success "Commands will be automatically discovered by Claude CLI"
 }
 
 # Create installation manifest
@@ -421,46 +403,11 @@ uninstall() {
             fi
         done
         
-        # Clean up slash commands from Claude commands directory
-        if [[ -d "$CLAUDE_COMMANDS_DIR" ]]; then
-            local removed_commands=0
-            for cmd_file in "$CLAUDE_COMMANDS_DIR"/gha-*.md; do
-                if [[ -f "$cmd_file" ]]; then
-                    rm "$cmd_file"
-                    ((removed_commands++))
-                fi
-            done
-            if [[ $removed_commands -gt 0 ]]; then
-                log_success "Removed $removed_commands slash command files"
-            fi
-        fi
-        
-        # Clean up slash commands from Claude settings
-        if [[ -f "$CLAUDE_SETTINGS_DIR/settings.json" ]]; then
-            python3 << 'EOF' "$CLAUDE_SETTINGS_DIR/settings.json"
-import json
-import sys
-
-settings_file = sys.argv[1]
-
-try:
-    with open(settings_file, 'r') as f:
-        settings = json.load(f)
-    
-    # Remove our commands
-    if 'slashCommands' in settings:
-        commands_to_remove = [k for k in settings['slashCommands'].keys() if k.startswith('/gha:')]
-        for cmd in commands_to_remove:
-            del settings['slashCommands'][cmd]
-    
-    with open(settings_file, 'w') as f:
-        json.dump(settings, f, indent=2)
-    
-    print(f"Removed {len(commands_to_remove)} slash commands")
-except:
-    print("Could not update Claude settings")
-EOF
-            log_success "Removed slash commands from Claude settings"
+        # Clean up command files from Claude commands directory
+        local claude_commands_dir="$HOME/.claude/commands/gha"
+        if [[ -d "$claude_commands_dir" ]]; then
+            rm -rf "$claude_commands_dir"
+            log_success "Removed GHA commands from $claude_commands_dir"
         fi
         
         log_success "Uninstallation complete"
@@ -486,7 +433,7 @@ main_install() {
     
     create_backup
     install_commands || { log_error "Failed to install commands."; return 1; }
-    install_claude_commands || { log_error "Failed to install Claude commands."; return 1; }
+    update_claude_settings || { log_error "Failed to update Claude settings."; return 1; }
     create_manifest
     add_to_path
     

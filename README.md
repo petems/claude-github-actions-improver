@@ -103,9 +103,9 @@ claude
 > /actions-minimal  # Ultra-fast template-based workflows
 ```
 
-**Install slash commands:**
+**Install enhanced system:**
 ```bash
-./install-slash-commands.sh
+./install-enhanced.sh
 ```
 
 ### ⚡ Direct Script Usage

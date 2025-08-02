@@ -10,10 +10,10 @@ Comprehensive reference for GitHub Actions slash commands in Claude CLI. Include
 ./install-enhanced.sh
 ```
 
-### Legacy Installation
+### Simple Installation
 ```bash
-chmod +x install-slash-commands.sh
-./install-slash-commands.sh
+# Single comprehensive installation script
+./install-enhanced.sh
 ```
 
 ## Enhanced Commands (Recommended)
