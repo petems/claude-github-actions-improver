@@ -8,6 +8,7 @@ import os
 import sys
 import unittest
 import json
+import logging
 import tempfile
 import subprocess
 from pathlib import Path
