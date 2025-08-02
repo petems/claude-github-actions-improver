@@ -154,7 +154,7 @@ check_prerequisites() {
     else
         log_debug "Found Claude CLI: $(command -v claude)"
         local claude_version
-        claude_version=$(claude --version 2>/dev/null || echo "unknown")
+        claude_version=$(timeout 5 claude --version 2>/dev/null || echo "unknown")
         log_debug "Claude CLI version: $claude_version"
     fi
     
@@ -162,7 +162,7 @@ check_prerequisites() {
     if command -v gh &> /dev/null; then
         log_debug "Found GitHub CLI: $(command -v gh)"
         local gh_version
-        gh_version=$(gh --version 2>/dev/null | head -n1 || echo "unknown")
+        gh_version=$(timeout 5 gh --version 2>/dev/null | head -n1 || echo "unknown")
         log_debug "GitHub CLI version: $gh_version"
     else
         log_warning "GitHub CLI not found. Some features (failure analysis) require 'gh'"
@@ -225,15 +225,22 @@ create_backup() {
 install_commands() {
     log_step "Installing command files..."
     
-    local commands_dir="$INSTALL_DIR/commands"
+    local claude_commands_dir="$HOME/.claude/commands/gha"
+    local local_commands_dir="$INSTALL_DIR/commands"
     
     if [[ "$DRY_RUN" == false ]]; then
-        mkdir -p "$commands_dir"
+        # Create Claude commands directory with gha subdirectory
+        mkdir -p "$claude_commands_dir"
+        mkdir -p "$local_commands_dir"
         
-        # Copy command files
+        # Copy command files to Claude's commands/gha directory
         if [[ -d "commands" ]]; then
-            cp -r commands/* "$commands_dir/"
-            log_success "Command files installed to: $commands_dir"
+            cp commands/*.md "$claude_commands_dir/"
+            log_success "Command files installed to Claude commands directory: $claude_commands_dir"
+            
+            # Also keep a copy in our install directory for reference
+            cp -r commands/* "$local_commands_dir/"
+            log_success "Command files backed up to: $local_commands_dir"
         else
             log_error "Commands directory not found in source"
             return 1
@@ -266,90 +273,15 @@ install_commands() {
         done
         
     else
-        log_info "[DRY RUN] Would install commands to: $commands_dir"
+        log_info "[DRY RUN] Would install commands to: $claude_commands_dir"
+        log_info "[DRY RUN] Would backup commands to: $local_commands_dir"
     fi
 }
 
-# Update Claude settings
+# Update Claude settings (no longer needed with commands directory)
 update_claude_settings() {
-    log_step "Updating Claude settings..."
-    
-    local settings_file="$CLAUDE_SETTINGS_DIR/settings.json"
-    local temp_settings="/tmp/claude_settings_temp.json"
-    
-    if [[ "$DRY_RUN" == false ]]; then
-        # Create settings if doesn't exist
-        if [[ ! -f "$settings_file" ]]; then
-            echo '{"slashCommands": {}}' > "$settings_file"
-            log_info "Created new Claude settings file"
-        fi
-        
-        # Read current slash commands from our command files
-        python3 << EOF
-import json
-import os
-import sys
-
-settings_file = "$settings_file"
-install_dir = "$INSTALL_DIR"
-
-# Load existing settings
-try:
-    with open(settings_file, 'r') as f:
-        settings = json.load(f)
-except:
-    settings = {}
-
-if 'slashCommands' not in settings:
-    settings['slashCommands'] = {}
-
-# Define our slash commands
-commands = {
-    "/gha:fix": {
-        "description": "Intelligent GitHub Actions failure resolution with log analysis",
-        "prompt": f"Execute the comprehensive GitHub Actions failure analysis workflow from {install_dir}/commands/gha-fix.md. Use the enhanced failure analyzer to examine recent workflow runs, identify error patterns, and apply targeted fixes based on root cause analysis.",
-        "working_directory_required": True,
-        "git_repository_required": True
-    },
-    "/gha:create": {
-        "description": "Intelligent GitHub Actions workflow creation tailored to project",
-        "prompt": f"Execute the intelligent workflow creation process from {install_dir}/commands/gha-create.md. Analyze the project structure, detect frameworks and dependencies, then generate optimized CI/CD workflows with security scanning and deployment automation.",
-        "working_directory_required": True,
-        "git_repository_required": True
-    },
-    "/gha:analyze": {
-        "description": "Comprehensive GitHub Actions intelligence and performance report",
-        "prompt": f"Execute the comprehensive GitHub Actions analysis workflow from {install_dir}/commands/gha-analyze.md. Generate detailed intelligence reports covering performance metrics, failure patterns, security posture, and optimization opportunities.",
-        "working_directory_required": True,
-        "git_repository_required": True
-    },
-    "/gha:setup-token": {
-        "description": "Interactive GitHub token generator and configuration helper",
-        "prompt": f"I'll help you set up a GitHub token for enhanced API access and higher rate limits. Let me check your current status and guide you through the setup.\\n\\nFirst, let me analyze your current configuration:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --status\\n```\\n\\nThen I'll show you the available setup options:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --options\\n```\\n\\nBased on your preference, I can help you with:\\n1. GitHub CLI setup (easiest)\\n2. Personal Access Token creation\\n3. Secure token storage\\n\\nThis will increase your rate limit from 60 to 5,000+ requests/hour and enable 20+ concurrent workers instead of just 2. Which option would you like to pursue?",
-        "working_directory_required": False,
-        "git_repository_required": False
-    },
-    "/gha:wgu": {
-        "description": "Won't Give Up - Persistent GitHub Actions fixer that keeps fighting until green",
-        "prompt": f"(ง'̀-'́)ง\\n\\nExecute the Won't Give Up (WGU) GitHub Actions fighter from {install_dir}/commands/gha-wgu.md. This is the most persistent and determined GitHub Actions fixer - it won't give up until everything is green!\\n\\nThe WGU fighter implements a relentless retry loop:\\n1. Analyze failing workflows with advanced pattern recognition\\n2. Apply intelligent fixes based on root cause analysis\\n3. Wait and monitor for workflow runs to complete (using 'gh run list --limit 5')\\n4. Verify results and celebrate victories with ୧༼ʘ̆ںʘ̆༽୨ when winning\\n5. Keep fighting until 100% success rate OR write detailed battle report\\n\\nThis code is a fighter - he won't give up! Perfect for stubborn workflows that keep failing despite multiple attempts. The fighter will keep trying different strategies, applying fixes, and monitoring results until everything turns green.\\n\\nUse this when regular /gha:fix isn't persistent enough and you need a determined approach that will keep fighting until victory is achieved.",
-        "working_directory_required": True,
-        "git_repository_required": True
-    }
-}
-
-# Update settings with our commands
-settings['slashCommands'].update(commands)
-
-# Write updated settings
-with open(settings_file, 'w') as f:
-    json.dump(settings, f, indent=2)
-
-print(f"Updated {len(commands)} slash commands in Claude settings")
-EOF
-        log_success "Claude settings updated with /gha: slash commands"
-    else
-        log_info "[DRY RUN] Would update Claude settings with /gha:* commands"
-    fi
+    log_step "Commands installed to ~/.claude/commands directory..."
+    log_success "Commands will be automatically discovered by Claude CLI"
 }
 
 # Create installation manifest
@@ -463,32 +395,11 @@ uninstall() {
             fi
         done
         
-        # Clean up slash commands from Claude settings
-        if [[ -f "$CLAUDE_SETTINGS_DIR/settings.json" ]]; then
-            python3 << 'EOF' "$CLAUDE_SETTINGS_DIR/settings.json"
-import json
-import sys
-
-settings_file = sys.argv[1]
-
-try:
-    with open(settings_file, 'r') as f:
-        settings = json.load(f)
-    
-    # Remove our commands
-    if 'slashCommands' in settings:
-        commands_to_remove = [k for k in settings['slashCommands'].keys() if k.startswith('/gha:')]
-        for cmd in commands_to_remove:
-            del settings['slashCommands'][cmd]
-    
-    with open(settings_file, 'w') as f:
-        json.dump(settings, f, indent=2)
-    
-    print(f"Removed {len(commands_to_remove)} slash commands")
-except:
-    print("Could not update Claude settings")
-EOF
-            log_success "Removed slash commands from Claude settings"
+        # Clean up command files from Claude commands directory
+        local claude_commands_dir="$HOME/.claude/commands/gha"
+        if [[ -d "$claude_commands_dir" ]]; then
+            rm -rf "$claude_commands_dir"
+            log_success "Removed GHA commands from $claude_commands_dir"
         fi
         
         log_success "Uninstallation complete"

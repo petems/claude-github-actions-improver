@@ -146,8 +146,8 @@ The analyzer generates detailed reports showing:
 git clone https://github.com/petems/claude-github-actions-improver.git
 cd claude-github-actions-improver
 
-# Install slash commands (includes enhanced /actions-fix)
-./install-slash-commands.sh
+# Install enhanced system (includes /gha:fix)
+./install-enhanced.sh
 
 # Update settings to use enhanced commands
 ```

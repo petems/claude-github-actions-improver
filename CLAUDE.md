@@ -22,7 +22,7 @@ The system now uses the ClaudePreference methodology with `/gha:` prefix command
 git clone https://github.com/petems/claude-github-actions-improver.git
 cd claude-github-actions-improver
 
-# Enterprise installation with backup/rollback
+# Enhanced installation with backup/rollback
 ./install-enhanced.sh
 
 # Set up GitHub token (recommended)
@@ -152,13 +152,16 @@ To use this agent in any repository:
 
 1. **Install the agent:**
    ```bash
-   ./install-agent.sh
+   ./install-enhanced.sh
    ```
 
 2. **Use from any repository:**
    ```bash
    cd /path/to/any/repo
-   claude --prompt "Improve GitHub Actions in this repository"
+   claude
+   > /gha:fix
+   > /gha:create
+   > /gha:analyze
    ```
 
 ## Files Created/Modified
