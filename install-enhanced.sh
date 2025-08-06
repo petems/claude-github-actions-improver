@@ -31,6 +31,7 @@ ROLLBACK_MODE=false
 # Global variables
 INSTALL_DIR="$DEFAULT_INSTALL_DIR"
 CLAUDE_SETTINGS_DIR=""
+CLAUDE_COMMANDS_DIR=""
 BACKUP_TIMESTAMP=""
 MANIFEST_FILE=""
 
@@ -178,25 +179,25 @@ check_prerequisites() {
     return 0
 }
 
-# Detect Claude settings directory
+# Detect Claude commands directories
 detect_claude_settings() {
-    log_step "Detecting Claude settings directory..."
+    log_step "Detecting Claude commands directories..."
     
+    # Global commands directory
     if [[ "$OSTYPE" == "darwin"* ]]; then
         CLAUDE_SETTINGS_DIR="$HOME/Library/Application Support/claude"
     else
         CLAUDE_SETTINGS_DIR="$HOME/.config/claude"
     fi
     
-    log_debug "Claude settings directory: $CLAUDE_SETTINGS_DIR"
+    CLAUDE_COMMANDS_DIR="$HOME/.claude/commands"
     
-    if [[ ! -d "$CLAUDE_SETTINGS_DIR" ]]; then
-        log_warning "Claude settings directory not found: $CLAUDE_SETTINGS_DIR"
-        log_warning "This suggests Claude CLI hasn't been run yet"
-        if [[ "$DRY_RUN" == false ]]; then
-            mkdir -p "$CLAUDE_SETTINGS_DIR"
-            log_info "Created Claude settings directory"
-        fi
+    log_debug "Claude settings directory: $CLAUDE_SETTINGS_DIR"
+    log_debug "Claude commands directory: $CLAUDE_COMMANDS_DIR"
+    
+    if [[ "$DRY_RUN" == false ]]; then
+        mkdir -p "$CLAUDE_COMMANDS_DIR"
+        log_info "Created Claude commands directory: $CLAUDE_COMMANDS_DIR"
     fi
 }
 
@@ -276,79 +277,35 @@ install_commands() {
     fi
 }
 
-# Update Claude settings
-update_claude_settings() {
-    log_step "Updating Claude settings..."
-    
-    local settings_file="$CLAUDE_SETTINGS_DIR/settings.json"
-    local temp_settings="/tmp/claude_settings_temp.json"
+# Install Claude slash commands
+install_claude_commands() {
+    log_step "Installing Claude slash commands..."
     
     if [[ "$DRY_RUN" == false ]]; then
-        # Create settings if doesn't exist
-        if [[ ! -f "$settings_file" ]]; then
-            echo '{"slashCommands": {}}' > "$settings_file"
-            log_info "Created new Claude settings file"
+        # Copy command files to Claude commands directory
+        if [[ -d "commands" ]]; then
+            # Copy all .md files from commands directory
+            cp commands/*.md "$CLAUDE_COMMANDS_DIR/"
+            log_success "Installed slash command files to: $CLAUDE_COMMANDS_DIR"
+            
+            # List installed commands
+            local installed_commands=($(ls "$CLAUDE_COMMANDS_DIR"/*.md 2>/dev/null | xargs -n1 basename -s .md))
+            if [[ ${#installed_commands[@]} -gt 0 ]]; then
+                log_info "Available slash commands:"
+                for cmd in "${installed_commands[@]}"; do
+                    log_debug "  /$cmd"
+                done
+            fi
+        else
+            log_error "Commands directory not found in source"
+            return 1
         fi
-        
-        # Read current slash commands from our command files
-        python3 << EOF
-import json
-import os
-import sys
-
-settings_file = "$settings_file"
-install_dir = "$INSTALL_DIR"
-
-# Load existing settings
-try:
-    with open(settings_file, 'r') as f:
-        settings = json.load(f)
-except:
-    settings = {}
-
-if 'slashCommands' not in settings:
-    settings['slashCommands'] = {}
-
-# Define our slash commands
-commands = {
-    "/gha:fix": {
-        "description": "Intelligent GitHub Actions failure resolution with log analysis",
-        "prompt": f"Execute the comprehensive GitHub Actions failure analysis workflow from {install_dir}/commands/gha-fix.md. Use the enhanced failure analyzer to examine recent workflow runs, identify error patterns, and apply targeted fixes based on root cause analysis.",
-        "working_directory_required": True,
-        "git_repository_required": True
-    },
-    "/gha:create": {
-        "description": "Intelligent GitHub Actions workflow creation tailored to project",
-        "prompt": f"Execute the intelligent workflow creation process from {install_dir}/commands/gha-create.md. Analyze the project structure, detect frameworks and dependencies, then generate optimized CI/CD workflows with security scanning and deployment automation.",
-        "working_directory_required": True,
-        "git_repository_required": True
-    },
-    "/gha:analyze": {
-        "description": "Comprehensive GitHub Actions intelligence and performance report",
-        "prompt": f"Execute the comprehensive GitHub Actions analysis workflow from {install_dir}/commands/gha-analyze.md. Generate detailed intelligence reports covering performance metrics, failure patterns, security posture, and optimization opportunities.",
-        "working_directory_required": True,
-        "git_repository_required": True
-    },
-    "/gha:setup-token": {
-        "description": "Interactive GitHub token generator and configuration helper",
-        "prompt": f"I'll help you set up a GitHub token for enhanced API access and higher rate limits. Let me check your current status and guide you through the setup.\\n\\nFirst, let me analyze your current configuration:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --status\\n```\\n\\nThen I'll show you the available setup options:\\n\\n```bash\\npython3 {install_dir}/claude-token-setup.py --options\\n```\\n\\nBased on your preference, I can help you with:\\n1. GitHub CLI setup (easiest)\\n2. Personal Access Token creation\\n3. Secure token storage\\n\\nThis will increase your rate limit from 60 to 5,000+ requests/hour and enable 20+ concurrent workers instead of just 2. Which option would you like to pursue?",
-        "working_directory_required": False,
-        "git_repository_required": False
-    }
-}
-
-# Update settings with our commands
-settings['slashCommands'].update(commands)
-
-# Write updated settings
-with open(settings_file, 'w') as f:
-    json.dump(settings, f, indent=2)
-
-print(f"Updated {len(commands)} slash commands in Claude settings")
-EOF
-        log_success "Claude settings updated with /gha: slash commands"
     else
-        log_info "[DRY RUN] Would update Claude settings with /gha:* commands"
+        log_info "[DRY RUN] Would install command files to: $CLAUDE_COMMANDS_DIR"
+        if [[ -d "commands" ]]; then
+            local command_files=($(ls commands/*.md 2>/dev/null))
+            log_info "[DRY RUN] Would install: ${command_files[*]}"
+        fi
     fi
 }
 
@@ -363,6 +320,7 @@ INSTALLATION_DATE=$(date -Iseconds)
 INSTALLATION_VERSION=$SCRIPT_VERSION
 INSTALL_DIRECTORY=$INSTALL_DIR
 CLAUDE_SETTINGS_DIR=$CLAUDE_SETTINGS_DIR
+CLAUDE_COMMANDS_DIR=$CLAUDE_COMMANDS_DIR
 BACKUP_DIRECTORY=$BACKUP_DIR
 USER=$(whoami)
 HOSTNAME=$(hostname)
@@ -463,32 +421,18 @@ uninstall() {
             fi
         done
         
-        # Clean up slash commands from Claude settings
-        if [[ -f "$CLAUDE_SETTINGS_DIR/settings.json" ]]; then
-            python3 << 'EOF'
-import json
-import sys
-
-settings_file = sys.argv[1]
-
-try:
-    with open(settings_file, 'r') as f:
-        settings = json.load(f)
-    
-    # Remove our commands
-    if 'slashCommands' in settings:
-        commands_to_remove = [k for k in settings['slashCommands'].keys() if k.startswith('/gha:')]
-        for cmd in commands_to_remove:
-            del settings['slashCommands'][cmd]
-    
-    with open(settings_file, 'w') as f:
-        json.dump(settings, f, indent=2)
-    
-    print(f"Removed {len(commands_to_remove)} slash commands")
-except:
-    print("Could not update Claude settings")
-EOF
-            log_success "Removed slash commands from Claude settings"
+        # Clean up slash commands from Claude commands directory
+        if [[ -d "$CLAUDE_COMMANDS_DIR" ]]; then
+            local removed_commands=0
+            for cmd_file in "$CLAUDE_COMMANDS_DIR"/gha-*.md; do
+                if [[ -f "$cmd_file" ]]; then
+                    rm "$cmd_file"
+                    ((removed_commands++))
+                fi
+            done
+            if [[ $removed_commands -gt 0 ]]; then
+                log_success "Removed $removed_commands slash command files"
+            fi
         fi
         
         log_success "Uninstallation complete"
@@ -514,19 +458,22 @@ main_install() {
     
     create_backup
     install_commands || { log_error "Failed to install commands."; return 1; }
-    update_claude_settings
+    install_claude_commands || { log_error "Failed to install Claude commands."; return 1; }
     create_manifest
     add_to_path
     
     log_success "Installation completed successfully!"
     echo
     log_info "Installation directory: $INSTALL_DIR"
-    log_info "Available commands:"
-    echo -e "  ${CYAN}/gha:fix${NC}        - Intelligent failure analysis and fixing"
-    echo -e "  ${CYAN}/gha:create${NC}     - Smart workflow creation for your project"
-    echo -e "  ${CYAN}/gha:analyze${NC}    - Comprehensive performance and security analysis"
+    log_info "Commands directory: $CLAUDE_COMMANDS_DIR"
+    log_info "Available slash commands:"
+    echo -e "  ${CYAN}/gha-fix${NC}        - Intelligent failure analysis and fixing"
+    echo -e "  ${CYAN}/gha-create${NC}     - Smart workflow creation for your project"
+    echo -e "  ${CYAN}/gha-analyze${NC}    - Comprehensive performance and security analysis"
+    echo -e "  ${CYAN}/gha-setup-token${NC} - GitHub token setup for enhanced API access"
     echo
     log_info "Usage: Navigate to any Git repository and run 'claude', then use the slash commands"
+    log_info "Note: Command files installed as Markdown files in ~/.claude/commands/"
     echo
     if [[ -n "$BACKUP_DIR" ]]; then
         log_info "Backup created at: $BACKUP_DIR"
