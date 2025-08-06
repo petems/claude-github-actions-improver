@@ -139,15 +139,20 @@ check_prerequisites() {
     
     # Check for required commands
     local required_commands=("git" "python3" "curl")
+    local missing_required=0
     for cmd in "${required_commands[@]}"; do
         if ! command -v "$cmd" &> /dev/null; then
             log_error "Required command '$cmd' not found"
-            return 1
+            missing_required=1
+        else
+            log_debug "Found $cmd: $(command -v "$cmd")"
         fi
-        log_debug "Found $cmd: $(command -v "$cmd")"
     done
+    if [[ $missing_required -eq 1 ]]; then
+        return 1
+    fi
     
-    # Check Claude CLI
+    # Check Claude CLI (optional)
     if ! command -v claude &> /dev/null; then
         log_warning "Claude CLI not found. Please install from: https://docs.anthropic.com/claude/docs"
         log_warning "Installation will continue, but commands won't work without Claude CLI"
@@ -158,7 +163,7 @@ check_prerequisites() {
         log_debug "Claude CLI version: $claude_version"
     fi
     
-    # Check GitHub CLI (optional but recommended)
+    # Check GitHub CLI (optional)
     if command -v gh &> /dev/null; then
         log_debug "Found GitHub CLI: $(command -v gh)"
         local gh_version
@@ -170,6 +175,7 @@ check_prerequisites() {
     fi
     
     log_success "System prerequisites checked"
+    return 0
 }
 
 # Detect Claude settings directory
@@ -495,7 +501,7 @@ EOF
 main_install() {
     log_info "Starting installation of $TOOL_NAME v$SCRIPT_VERSION"
     
-    check_prerequisites
+    check_prerequisites || { log_error "System prerequisites not met. Aborting."; return 1; }
     detect_claude_settings
     
     if [[ "$UPDATE_MODE" == true ]]; then
@@ -507,7 +513,7 @@ main_install() {
     fi
     
     create_backup
-    install_commands
+    install_commands || { log_error "Failed to install commands."; return 1; }
     update_claude_settings
     create_manifest
     add_to_path
@@ -532,11 +538,11 @@ main() {
     parse_arguments "$@"
     
     if [[ "$ROLLBACK_MODE" == true ]]; then
-        rollback_installation
+        rollback_installation || { log_error "Rollback failed."; exit 1; }
     elif [[ "$UNINSTALL_MODE" == true ]]; then
-        uninstall
+        uninstall || { log_error "Uninstall failed."; exit 1; }
     else
-        main_install
+        main_install || { log_error "Installation failed."; exit 1; }
     fi
 }
 
